@@ -25,6 +25,16 @@ trait ApiResponseTrait
         return $this->errorResponse('Validation Error', 422, $errors);
     }
 
+    public function unauthenticatedResponse(string $message = 'Unauthenticated')
+    {
+        return $this->errorResponse($message, 401);
+    }
+
+    public function forbiddenResponse(string $message = 'Forbidden')
+    {
+        return $this->errorResponse($message, 403);
+    }
+
     public function notFoundResponse(string $message)
     {
         return $this->errorResponse($message, 404);

@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSupplierRequest;
+use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Supplier;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class SupplierController extends Controller
 {
     use ApiResponseTrait;
 
-    /**
-     * Display a listing of the resource.
-     */
     #[OA\Get(
         path: '/api/suppliers',
         summary: 'List suppliers',
+        description: 'Permission: suppliers.view',
         tags: ['Suppliers'],
         responses: [
-            new OA\Response(response: 200, description: 'Suppliers retrieved successfully'),
+            new OA\Response(response: 200, description: 'Suppliers retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/SupplierListResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
         ]
     )]
     public function index()
@@ -29,12 +30,10 @@ class SupplierController extends Controller
         return $this->successResponse($suppliers, 'Suppliers retrieved successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     #[OA\Post(
         path: '/api/suppliers',
         summary: 'Create a supplier',
+        description: 'Permission: suppliers.create',
         tags: ['Suppliers'],
         requestBody: new OA\RequestBody(
             required: true,
@@ -48,42 +47,38 @@ class SupplierController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: 'Supplier created successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 201, description: 'Supplier created successfully', content: new OA\JsonContent(ref: '#/components/schemas/SupplierResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function store(Request $request)
+    public function store(StoreSupplierRequest $request)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:255',
-            ]);
-
-            $supplier = Supplier::create($validatedData);
+            $supplier = Supplier::create($request->validated());
 
             return $this->successResponse($supplier, 'Supplier created successfully', 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     #[OA\Get(
         path: '/api/suppliers/{supplier}',
         summary: 'Show a supplier',
+        description: 'Permission: suppliers.view',
         tags: ['Suppliers'],
         parameters: [
             new OA\Parameter(name: 'supplier', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Supplier retrieved successfully'),
-            new OA\Response(response: 404, description: 'Supplier not found'),
+            new OA\Response(response: 200, description: 'Supplier retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/SupplierResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
     public function show($supplier)
@@ -100,12 +95,10 @@ class SupplierController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     #[OA\Put(
         path: '/api/suppliers/{supplier}',
         summary: 'Update a supplier',
+        description: 'Permission: suppliers.update',
         tags: ['Suppliers'],
         parameters: [
             new OA\Parameter(name: 'supplier', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
@@ -121,41 +114,38 @@ class SupplierController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Supplier updated successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 200, description: 'Supplier updated successfully', content: new OA\JsonContent(ref: '#/components/schemas/SupplierResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function update(Request $request, Supplier $supplier)
+    public function update(UpdateSupplierRequest $request, Supplier $supplier)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'sometimes|required|string|max:255',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:255',
-            ]);
-
-            $supplier->update($validatedData);
+            $supplier->update($request->validated());
 
             return $this->successResponse($supplier, 'Supplier updated successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     #[OA\Delete(
         path: '/api/suppliers/{supplier}',
         summary: 'Delete a supplier',
+        description: 'Permission: suppliers.delete',
         tags: ['Suppliers'],
         parameters: [
             new OA\Parameter(name: 'supplier', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Supplier deleted successfully'),
+            new OA\Response(response: 200, description: 'Supplier deleted successfully', content: new OA\JsonContent(ref: '#/components/schemas/EmptyResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
         ]
     )]
     public function destroy(Supplier $supplier)

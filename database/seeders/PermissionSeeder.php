@@ -18,6 +18,9 @@ class PermissionSeeder extends Seeder
             'suppliers' => 'proveedores',
             'locations' => 'ubicaciones',
             'movements' => 'movimientos',
+            'users' => 'usuarios',
+            'roles' => 'roles',
+            'permissions' => 'permisos',
         ];
 
         $actions = [

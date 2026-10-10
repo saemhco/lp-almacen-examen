@@ -24,16 +24,37 @@ class RoleSeeder extends Seeder
             ['description' => 'Consulta el almacen y registra entradas y salidas'],
         );
 
+        $supervisor = Role::query()->firstOrCreate(
+            ['name' => 'supervisor'],
+            ['description' => 'Revisa el almacen, corrige items y ajusta movimientos'],
+        );
+
         $admin->permissions()->sync(Permission::query()->pluck('id'));
 
+        $warehouseViews = [
+            'items.view',
+            'categories.view',
+            'suppliers.view',
+            'locations.view',
+            'movements.view',
+        ];
+
         $staffPermissions = Permission::query()
-            ->where(function ($query) {
-                $query->where('name', 'like', '%.view')
-                    ->orWhere('name', 'movements.create');
-            })
+            ->whereIn('name', [...$warehouseViews, 'movements.create'])
             ->pluck('id');
 
         $staff->permissions()->sync($staffPermissions);
+
+        $supervisorPermissions = Permission::query()
+            ->whereIn('name', [
+                ...$warehouseViews,
+                'items.update',
+                'movements.create',
+                'movements.update',
+            ])
+            ->pluck('id');
+
+        $supervisor->permissions()->sync($supervisorPermissions);
 
         User::query()->where('email', 'admin@example.com')->update([
             'role_id' => $admin->id,
@@ -45,6 +66,15 @@ class RoleSeeder extends Seeder
                 'name' => 'Almacenista',
                 'password' => 'password',
                 'role_id' => $staff->id,
+            ],
+        );
+
+        User::query()->firstOrCreate(
+            ['email' => 'supervisor@example.com'],
+            [
+                'name' => 'Supervisor',
+                'password' => 'password',
+                'role_id' => $supervisor->id,
             ],
         );
     }

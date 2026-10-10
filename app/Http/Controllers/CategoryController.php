@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class CategoryController extends Controller
 {
     use ApiResponseTrait;
 
-    /**
-     * Display a listing of the resource.
-     */
     #[OA\Get(
         path: '/api/categories',
         summary: 'List categories',
+        description: 'Permission: categories.view',
         tags: ['Categories'],
         responses: [
-            new OA\Response(response: 200, description: 'Categories retrieved successfully'),
+            new OA\Response(response: 200, description: 'Categories retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/CategoryListResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
         ]
     )]
     public function index()
@@ -29,12 +30,10 @@ class CategoryController extends Controller
         return $this->successResponse($categories, 'Categories retrieved successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     #[OA\Post(
         path: '/api/categories',
         summary: 'Create a category',
+        description: 'Permission: categories.create',
         tags: ['Categories'],
         requestBody: new OA\RequestBody(
             required: true,
@@ -47,41 +46,38 @@ class CategoryController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: 'Category created successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 201, description: 'Category created successfully', content: new OA\JsonContent(ref: '#/components/schemas/CategoryResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255|unique:categories,name',
-                'description' => 'nullable|string',
-            ]);
-
-            $category = Category::create($validatedData);
+            $category = Category::create($request->validated());
 
             return $this->successResponse($category, 'Category created successfully', 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     #[OA\Get(
         path: '/api/categories/{category}',
         summary: 'Show a category',
+        description: 'Permission: categories.view',
         tags: ['Categories'],
         parameters: [
             new OA\Parameter(name: 'category', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Category retrieved successfully'),
-            new OA\Response(response: 404, description: 'Category not found'),
+            new OA\Response(response: 200, description: 'Category retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/CategoryResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
     public function show($category)
@@ -98,12 +94,10 @@ class CategoryController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     #[OA\Put(
         path: '/api/categories/{category}',
         summary: 'Update a category',
+        description: 'Permission: categories.update',
         tags: ['Categories'],
         parameters: [
             new OA\Parameter(name: 'category', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
@@ -118,40 +112,38 @@ class CategoryController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Category updated successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 200, description: 'Category updated successfully', content: new OA\JsonContent(ref: '#/components/schemas/CategoryResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'sometimes|required|string|max:255|unique:categories,name,'.$category->id,
-                'description' => 'nullable|string',
-            ]);
-
-            $category->update($validatedData);
+            $category->update($request->validated());
 
             return $this->successResponse($category, 'Category updated successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     #[OA\Delete(
         path: '/api/categories/{category}',
         summary: 'Delete a category',
+        description: 'Permission: categories.delete',
         tags: ['Categories'],
         parameters: [
             new OA\Parameter(name: 'category', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Category deleted successfully'),
+            new OA\Response(response: 200, description: 'Category deleted successfully', content: new OA\JsonContent(ref: '#/components/schemas/EmptyResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
         ]
     )]
     public function destroy(Category $category)

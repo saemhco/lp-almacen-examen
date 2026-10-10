@@ -2,37 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreItemRequest;
+use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class ItemController extends Controller
 {
     use ApiResponseTrait;
-    /**
-     * Display a listing of the resource.
-     */
+
     #[OA\Get(
         path: '/api/items',
         summary: 'List items',
+        description: 'Permission: items.view',
         tags: ['Items'],
         responses: [
-            new OA\Response(response: 200, description: 'Items retrieved successfully'),
+            new OA\Response(response: 200, description: 'Items retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/ItemListResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
         ]
     )]
     public function index()
     {
         $items = Item::all();
+
         return $this->successResponse($items, 'Items retrieved successfully');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     #[OA\Post(
         path: '/api/items',
         summary: 'Create an item',
+        description: 'Permission: items.create',
         tags: ['Items'],
         requestBody: new OA\RequestBody(
             required: true,
@@ -50,46 +51,38 @@ class ItemController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: 'Item created successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 201, description: 'Item created successfully', content: new OA\JsonContent(ref: '#/components/schemas/ItemResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function store(Request $request)
+    public function store(StoreItemRequest $request)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255|unique:items,name',
-                'description' => 'nullable|string',
-                'price' => 'required|numeric|min:0',
-                'quantity' => 'required|integer|min:0',
-                'category_id' => 'required|exists:categories,id',
-                'supplier_id' => 'required|exists:suppliers,id',
-                'location_id' => 'required|exists:locations,id',
-            ]);
-
-            $item = Item::create($validatedData);
+            $item = Item::create($request->validated());
 
             return $this->successResponse($item, 'Item created successfully', 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     #[OA\Get(
         path: '/api/items/{item}',
         summary: 'Show an item',
+        description: 'Permission: items.view',
         tags: ['Items'],
         parameters: [
             new OA\Parameter(name: 'item', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Item retrieved successfully'),
-            new OA\Response(response: 404, description: 'Item not found'),
+            new OA\Response(response: 200, description: 'Item retrieved successfully', content: new OA\JsonContent(ref: '#/components/schemas/ItemResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
     public function show($item)
@@ -106,12 +99,10 @@ class ItemController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     #[OA\Put(
         path: '/api/items/{item}',
         summary: 'Update an item',
+        description: 'Permission: items.update',
         tags: ['Items'],
         parameters: [
             new OA\Parameter(name: 'item', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
@@ -131,50 +122,44 @@ class ItemController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Item updated successfully'),
-            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 200, description: 'Item updated successfully', content: new OA\JsonContent(ref: '#/components/schemas/ItemResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
+            new OA\Response(response: 422, ref: '#/components/responses/ValidationError'),
+            new OA\Response(response: 500, ref: '#/components/responses/ServerError'),
         ]
     )]
-    public function update(Request $request, Item $item)
+    public function update(UpdateItemRequest $request, Item $item)
     {
         try {
-            $validatedData = $request->validate([
-                'name' => 'sometimes|required|string|max:255|unique:items,name,' . $item->id,
-                'description' => 'nullable|string',
-                'price' => 'sometimes|required|numeric|min:0',
-                'quantity' => 'sometimes|required|integer|min:0',
-                'category_id' => 'sometimes|required|exists:categories,id',
-                'supplier_id' => 'sometimes|required|exists:suppliers,id',
-                'location_id' => 'sometimes|required|exists:locations,id',
-            ]);
-
-            $item->update($validatedData);
+            $item->update($request->validated());
 
             return $this->successResponse($item, 'Item updated successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->serverErrorResponse($e);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     #[OA\Delete(
         path: '/api/items/{item}',
         summary: 'Delete an item',
+        description: 'Permission: items.delete',
         tags: ['Items'],
         parameters: [
             new OA\Parameter(name: 'item', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Item deleted successfully'),
+            new OA\Response(response: 200, description: 'Item deleted successfully', content: new OA\JsonContent(ref: '#/components/schemas/EmptyResponse')),
+            new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
+            new OA\Response(response: 403, ref: '#/components/responses/Forbidden'),
+            new OA\Response(response: 404, ref: '#/components/responses/NotFound'),
         ]
     )]
     public function destroy(Item $item)
     {
         $item->delete();
+
         return $this->successResponse(null, 'Item deleted successfully');
     }
 }

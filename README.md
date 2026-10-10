@@ -13,17 +13,18 @@ El catálogo se arma antes que el inventario:
 5. Un **movimiento** registra una entrada o una salida de un ítem: quién la hizo, la cantidad y una nota. La entrada inicial de cada ítem queda como carga de stock.
 6. Un **usuario** tiene un **rol**. El rol agrupa **permisos** con el nombre `recurso.accion`, por ejemplo `items.delete` o `movements.create`.
 
-Hoy las rutas responden sin pedir token. Sanctum ya está instalado y `User` puede comprobar un permiso con `hasPermission('items.create')`. El login y el middleware que usan esos permisos se arman en clase.
+`POST /api/login` devuelve un token de Sanctum. El resto de las rutas piden `Authorization: Bearer {token}`. El middleware `permission` deja pasar la acción solo si el rol del usuario tiene ese permiso, por ejemplo `users.view`.
 
 Todas las respuestas JSON usan las mismas claves: `success`, `code`, `message` y `data`.
 
 ## Roles y funciones
 
-La contraseña de los dos usuarios de prueba es `password`.
+La contraseña de los tres usuarios de prueba es `password`.
 
 | Rol | Usuario | Función |
 | --- | --- | --- |
-| `admin` | `admin@example.com` | Administra el catálogo y los movimientos. Tiene los 20 permisos: ver, crear, actualizar y eliminar ítems, categorías, proveedores, ubicaciones y movimientos. |
+| `admin` | `admin@example.com` | Administra el catálogo, los movimientos, los usuarios, los roles y los permisos. Tiene ver, crear, actualizar y eliminar en cada recurso. |
+| `supervisor` | `supervisor@example.com` | Revisa el almacén, corrige ítems y ajusta movimientos. Ve los cinco recursos, actualiza ítems y crea o actualiza movimientos. No crea ni elimina el catálogo, y no elimina movimientos. |
 | `almacenista` | `almacenista@example.com` | Consulta el almacén y registra entradas y salidas. Puede ver los cinco recursos y crear movimientos. No crea, ni edita, ni elimina el catálogo, y no modifica ni borra movimientos. |
 
 Permisos del almacenista:
@@ -33,7 +34,17 @@ Permisos del almacenista:
 | `items.view`, `categories.view`, `suppliers.view`, `locations.view`, `movements.view` | Listar y ver un registro |
 | `movements.create` | Registrar una entrada o una salida |
 
-El admin tiene esos mismos permisos y, además, `create`, `update` y `delete` de cada recurso.
+El supervisor tiene esos mismos permisos y, además, `items.update` y `movements.update`.
+
+Solo el administrador puede gestionar usuarios, roles y permisos, y también crear, editar o borrar el catálogo (categorías, proveedores y ubicaciones), crear o borrar ítems y borrar movimientos. El almacenista y el supervisor reciben `403` en esas rutas.
+
+| Rutas solo de admin | Permisos |
+| --- | --- |
+| `/api/users` | `users.view`, `users.create`, `users.update`, `users.delete` |
+| `/api/roles` | `roles.view`, `roles.create`, `roles.update`, `roles.delete` |
+| `/api/permissions` | `permissions.view`, `permissions.create`, `permissions.update`, `permissions.delete` |
+| Alta, edición y borrado de categorías, proveedores y ubicaciones | `create`, `update` y `delete` de cada uno |
+| Alta y borrado de ítems, borrado de movimientos | `items.create`, `items.delete`, `movements.delete` |
 
 ## Qué creamos
 
@@ -45,22 +56,28 @@ El admin tiene esos mismos permisos y, además, `create`, `update` y `delete` de
 | Movimiento | `app/Models/Movement.php` | Entrada o salida de stock |
 | Rol y permiso | `app/Models/Role.php`, `Permission.php` | Qué puede hacer cada usuario |
 | Usuario | `app/Models/User.php` | Persona que entra al sistema y tiene un rol |
+| Middleware | `app/Http/Middleware/CheckPermission.php` | Compara la ruta con un permiso del rol |
+| Form requests | `app/Http/Requests/` | Reglas de validación de cada alta y actualización |
 | Seeders | `database/seeders/` | Cargan permisos, roles, usuarios, catálogo, ítems y movimientos |
-| Controladores | `app/Http/Controllers/` | CRUD de cada recurso |
+| Controladores | `app/Http/Controllers/` | CRUD de cada recurso, más login y logout |
 | Trait de respuestas | `app/Traits/ApiResponseTrait.php` | Formato JSON de éxito y error |
 | Rutas API | `routes/api.php` | Endpoints bajo `/api` |
-| Sanctum | `laravel/sanctum` | Tokens de acceso. Todavía no protegen las rutas |
-| Swagger | `darkaonline/l5-swagger` | Documenta los endpoints |
+| Sanctum | `laravel/sanctum` | Tokens de acceso. Protegen las rutas junto con el middleware `permission` |
+| Swagger | `app/OpenApi/Documentation.php` y los controladores | Documenta cuerpos, permisos y códigos de error |
 
-Cada recurso tiene las mismas cinco rutas. `{id}` es el id del registro.
+`POST /api/login` es público. `POST /api/logout` pide token. Cada recurso tiene las mismas cinco rutas y el middleware `permission:{recurso}.{accion}`. `{id}` es el id del registro.
 
-| Método | Rutas | Acción |
+| Método | Rutas | Permiso |
 | --- | --- | --- |
-| GET | `/api/items`, `/api/categories`, `/api/suppliers`, `/api/locations`, `/api/movements` | Listar |
-| POST | las mismas | Crear |
-| GET | `/api/{recurso}/{id}` | Ver uno |
-| PUT | `/api/{recurso}/{id}` | Actualizar |
-| DELETE | `/api/{recurso}/{id}` | Eliminar |
+| GET | `/api/items`, `/api/categories`, `/api/suppliers`, `/api/locations`, `/api/movements`, `/api/users`, `/api/roles`, `/api/permissions` | `{recurso}.view` |
+| POST | las mismas | `{recurso}.create` |
+| GET | `/api/{recurso}/{id}` | `{recurso}.view` |
+| PUT | `/api/{recurso}/{id}` | `{recurso}.update` |
+| DELETE | `/api/{recurso}/{id}` | `{recurso}.delete` |
+
+En un rol, `permission_ids` asigna los permisos en el alta y en la actualización. Una validación que falla responde `422` con los errores en `data`.
+
+Para probar en Swagger: `POST /api/login` con `admin@example.com` y `password`, copiar `data.token` y pegarlo en **Authorize**. El login es la única ruta pública.
 
 ## Laravel
 
@@ -111,6 +128,14 @@ En `make:model`, las banderas son:
 
 El trait `ApiResponseTrait` se escribió a mano en `app/Traits/`. Artisan no trae un comando para traits.
 
+Las reglas de validación viven en un Form Request, no en el controlador:
+
+```bash
+php artisan make:request StoreItemRequest
+```
+
+`StoreItemRequest` y `UpdateItemRequest` extienden `ApiFormRequest`, que devuelve el JSON de error `422`.
+
 ### Migraciones
 
 ```bash
@@ -137,7 +162,7 @@ php artisan db:seed
 php artisan db:seed --class=ItemSeeder
 ```
 
-- `db:seed` corre `DatabaseSeeder`: permisos, roles, usuario admin, categorías, proveedores, ubicaciones, ítems y movimientos. `RoleSeeder` también crea al usuario almacenista.
+- `db:seed` corre `DatabaseSeeder`: permisos, roles, usuario admin, categorías, proveedores, ubicaciones, ítems y movimientos. `RoleSeeder` también crea a los usuarios almacenista y supervisor.
 - `--class` corre un seeder concreto.
 - Dentro del seeder, `Item::factory()->count(10)->create()` usa el factory para insertar 10 ítems falsos.
 
@@ -258,4 +283,4 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-La API queda en `http://127.0.0.1:8000/api/items`. Swagger queda en `http://127.0.0.1:8000/api/documentation`.
+Swagger queda en `http://127.0.0.1:8000/api/documentation`. Para llamar a la API, primero `POST /api/login` y después enviar el token en `Authorization: Bearer {token}`.
