@@ -1,10 +1,10 @@
 # Examen
 
-Las respuestas se buscan en el código y probando la API. Cada respuesta es un solo flag: un dato, sin explicación.
+Las respuestas se encuentran resolviendo cada pregunta. Cada respuesta es un solo flag: un dato, sin explicación.
 
 ## Pregunta 1
 
-`php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página.
+Clona el repositorio https://github.com/saemhco/lp-almacen-examen. Luego, `php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página.
 
 ```
 FLAG{...}
@@ -12,7 +12,7 @@ FLAG{...}
 
 ## Pregunta 2
 
-Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
+Después de sembrar (correr los seeders), abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
 
 ```
 FLAG{cantidad}
