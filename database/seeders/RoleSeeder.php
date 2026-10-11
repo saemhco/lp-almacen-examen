@@ -64,7 +64,7 @@ class RoleSeeder extends Seeder
             ['email' => 'almacenista@example.com'],
             [
                 'name' => 'Almacenista',
-                'password' => 'password',
+                'password' => 'Almacen2026',
                 'role_id' => $staff->id,
             ],
         );
@@ -73,7 +73,7 @@ class RoleSeeder extends Seeder
             ['email' => 'supervisor@example.com'],
             [
                 'name' => 'Supervisor',
-                'password' => 'password',
+                'password' => 'Supervisor2026',
                 'role_id' => $supervisor->id,
             ],
         );

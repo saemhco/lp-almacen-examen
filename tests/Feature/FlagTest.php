@@ -57,7 +57,7 @@ class FlagTest extends TestCase
 
         $staffLogin = $this->postJson('/api/login', [
             'email' => 'almacenista@example.com',
-            'password' => 'password',
+            'password' => 'Almacen2026',
         ])->assertOk();
 
         $this->withToken($staffLogin->json('data.token'))

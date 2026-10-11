@@ -35,7 +35,7 @@ Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token 
 
 ## Pregunta 4
 
-En Swagger o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
+En Swagger (http://127.0.0.1:8000/api/documentation) o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
 
 ```json
 {
