@@ -23,18 +23,19 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * El servidor no arranca hasta que $proyectoListo sea true.
+     * Ningún endpoint responde hasta que $proyectoListo sea true.
+     * Las pruebas automáticas no quedan bloqueadas.
      */
     private function guardProjectStart(): void
     {
+        if ($this->app->runningUnitTests()) {
+            config(['proyecto.listo' => true]);
+
+            return;
+        }
+
         $proyectoListo = false;
 
-        $command = $_SERVER['argv'][1] ?? null;
-
-        if ($command === 'serve' && $proyectoListo !== true) {
-            throw new \RuntimeException(
-                'El servidor no arranca. Abre app/Providers/AppServiceProvider.php y pon $proyectoListo en true.'
-            );
-        }
+        config(['proyecto.listo' => $proyectoListo]);
     }
 }

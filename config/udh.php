@@ -3,10 +3,13 @@
 return [
     'url' => 'https://panki.quipu.club/api/v1/udh/lp1',
 
-    'rol' => 'adminn',
+    'rol' => 'adnim',
 
     'metadatos' => [
-        'carrera' => 'Medicina',
+        'facultad' => 'Ingeniería',
+        'programa_academico' => 'Sistemas e Informática',
         'ciclo' => 8,
+        'ip' => null,
+        'agente' => null,
     ],
 ];

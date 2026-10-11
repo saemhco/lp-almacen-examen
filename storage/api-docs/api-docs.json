@@ -1364,7 +1364,7 @@
                     "Registro"
                 ],
                 "summary": "Registrar al estudiante y obtener el flag",
-                "description": "POST. También se puede llamar desde Postman con el token de un administrador. Cuerpo: nombres, apellidos y codigo_universitario. El servidor agrega los metadatos del equipo y consulta el servicio externo, que no pide sesión. Si el rol no coincide, el mensaje indica el archivo y qué corregir. El flag es data.codigo.",
+                "description": "POST. También se puede llamar desde Postman con el token de un administrador. Cuerpo: nombres, apellidos y codigo_universitario. El servidor agrega los metadatos del equipo y consulta el servicio externo, que no pide sesión. Si el rol no coincide, el mensaje indica el archivo y qué corregir. La respuesta está en data.mensaje.",
                 "operationId": "f75b3b3f9e1ae7a0707d0084626557f1",
                 "requestBody": {
                     "required": true,
@@ -1397,7 +1397,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Registro correcto. El flag es data.codigo.",
+                        "description": "Registro correcto. La respuesta está en data.mensaje.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2179,11 +2179,11 @@
         "schemas": {
             "Registro": {
                 "required": [
-                    "codigo"
+                    "mensaje"
                 ],
                 "properties": {
-                    "codigo": {
-                        "description": "Flag devuelto por el registro.",
+                    "mensaje": {
+                        "description": "Respuesta devuelta por el registro.",
                         "type": "string"
                     }
                 },
@@ -2238,7 +2238,7 @@
                     },
                     "message": {
                         "type": "string",
-                        "example": "Registro correcto"
+                        "example": "La respuesta está en data.mensaje."
                     },
                     "data": {
                         "$ref": "#/components/schemas/Registro"
@@ -3243,7 +3243,7 @@
         },
         {
             "name": "Registro",
-            "description": "Registro del estudiante. POST /api/registro con el token de un administrador. El flag es data.codigo."
+            "description": "Registro del estudiante. POST /api/registro con el token de un administrador. La respuesta está en data.mensaje."
         },
         {
             "name": "Mensaje",

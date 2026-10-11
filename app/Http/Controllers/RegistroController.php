@@ -14,7 +14,7 @@ class RegistroController extends Controller
     #[OA\Post(
         path: '/api/registro',
         summary: 'Registrar al estudiante y obtener el flag',
-        description: 'POST. También se puede llamar desde Postman con el token de un administrador. Cuerpo: nombres, apellidos y codigo_universitario. El servidor agrega los metadatos del equipo y consulta el servicio externo, que no pide sesión. Si el rol no coincide, el mensaje indica el archivo y qué corregir. El flag es data.codigo.',
+        description: 'POST. También se puede llamar desde Postman con el token de un administrador. Cuerpo: nombres, apellidos y codigo_universitario. El servidor agrega los metadatos del equipo y consulta el servicio externo, que no pide sesión. Si el rol no coincide, el mensaje indica el archivo y qué corregir. La respuesta está en data.mensaje.',
         tags: ['Registro'],
         requestBody: new OA\RequestBody(
             required: true,
@@ -30,7 +30,7 @@ class RegistroController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Registro correcto. El flag es data.codigo.',
+                description: 'Registro correcto. La respuesta está en data.mensaje.',
                 content: new OA\JsonContent(ref: '#/components/schemas/RegistroResponse')
             ),
             new OA\Response(response: 401, ref: '#/components/responses/Unauthenticated'),
@@ -53,7 +53,7 @@ class RegistroController extends Controller
         }
 
         if ($user->role->name !== $rol) {
-            return $this->forbiddenResponse('El nombre del rol tiene una letra de más. Abre config/udh.php y corrige el nombre del rol.');
+            return $this->forbiddenResponse('El nombre del rol es incorrecto. Abre config/udh.php y corrige el nombre del rol.');
         }
 
         $validated = $request->validated();
@@ -65,7 +65,11 @@ class RegistroController extends Controller
                     'nombres' => $validated['nombres'],
                     'apellidos' => $validated['apellidos'],
                     'codigo_universitario' => $validated['codigo_universitario'],
-                    'metadatos' => config('udh.metadatos'),
+                    'metadatos' => array_merge(config('udh.metadatos'), [
+                        'ip' => $request->ip(),
+                        'agente' => $request->userAgent(),
+                        'fecha' => now()->format('Y-m-d'),
+                    ]),
                 ]);
         } catch (\Exception $e) {
             return $this->errorResponse('No se pudo contactar el servicio de registro', 502);
@@ -78,7 +82,7 @@ class RegistroController extends Controller
         }
 
         return $this->successResponse([
-            'codigo' => $codigo,
-        ], 'Registro correcto');
+            'mensaje' => $codigo,
+        ], 'La respuesta está en data.mensaje.');
     }
 }

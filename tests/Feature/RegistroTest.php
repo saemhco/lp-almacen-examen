@@ -86,14 +86,19 @@ class RegistroTest extends TestCase
             ->postJson('/api/registro', $this->payload())
             ->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.codigo', 'UDH-LP1-042');
+            ->assertJsonPath('message', 'La respuesta está en data.mensaje.')
+            ->assertJsonPath('data.mensaje', 'UDH-LP1-042');
 
         Http::assertSent(function ($request) {
             return $request->url() === 'https://panki.quipu.club/api/v1/udh/lp1'
                 && $request['nombres'] === 'Saúl'
                 && $request['apellidos'] === 'Escandón'
                 && $request['codigo_universitario'] === '20201234'
-                && $request['metadatos'] === ['carrera' => 'Medicina', 'ciclo' => 8]
+                && $request['metadatos']['facultad'] === 'Ingeniería'
+                && $request['metadatos']['programa_academico'] === 'Sistemas e Informática'
+                && $request['metadatos']['ciclo'] === 8
+                && $request['metadatos']['ip'] === '127.0.0.1'
+                && array_key_exists('agente', $request['metadatos'])
                 && ! $request->hasHeader('Authorization');
         });
     }
