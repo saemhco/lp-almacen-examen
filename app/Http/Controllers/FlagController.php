@@ -15,13 +15,13 @@ class FlagController extends Controller
 
     #[OA\Get(
         path: '/api/mensaje',
-        summary: 'Mensaje para el administrador',
-        description: 'GET en JSON. Sin token indica que uses el tuyo. Con el token de un usuario administrador, el flag está en data.respuesta.',
+        summary: 'Mensaje para el almacenista',
+        description: 'GET en JSON. Sin token indica que uses el tuyo. Con el token de un usuario almacenista, el flag está en data.respuesta.',
         tags: ['Mensaje'],
         responses: [
             new OA\Response(response: 200, description: 'El flag es data.respuesta', content: new OA\JsonContent(ref: '#/components/schemas/MensajeResponse')),
             new OA\Response(response: 401, description: 'Falta el token', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
-            new OA\Response(response: 403, description: 'El token no es de un administrador', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 403, description: 'El token no es de un almacenista', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
         ]
     )]
     public function mensaje(Request $request)
@@ -36,12 +36,12 @@ class FlagController extends Controller
 
         $user->load('role');
 
-        if ($user->role?->name !== 'admin') {
-            return $this->forbiddenResponse('Usa el token de un usuario administrador para poder ver el mensaje.');
+        if ($user->role?->name !== 'almacenista') {
+            return $this->forbiddenResponse('Usa el token de un usuario almacenista para poder ver el mensaje.');
         }
 
         return $this->successResponse([
-            'respuesta' => 'FLAG{token-admin}',
+            'respuesta' => 'FLAG{token-almacenista}',
         ], 'El flag es data.respuesta.');
     }
 

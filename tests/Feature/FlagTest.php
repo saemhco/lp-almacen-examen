@@ -33,21 +33,11 @@ class FlagTest extends TestCase
             ->assertSee('FLAG{'.$total.'}', false);
     }
 
-    public function test_mensaje_requires_an_admin_token_and_returns_respuesta(): void
+    public function test_mensaje_requires_an_almacenista_token_and_returns_respuesta(): void
     {
         $this->getJson('/api/mensaje')
             ->assertUnauthorized()
             ->assertJsonPath('message', 'Usa tu token para poder ver el mensaje.');
-
-        $staffLogin = $this->postJson('/api/login', [
-            'email' => 'almacenista@example.com',
-            'password' => 'password',
-        ])->assertOk();
-
-        $this->withToken($staffLogin->json('data.token'))
-            ->getJson('/api/mensaje')
-            ->assertForbidden()
-            ->assertJsonPath('message', 'Usa el token de un usuario administrador para poder ver el mensaje.');
 
         User::factory()->create([
             'email' => 'admin@example.com',
@@ -62,9 +52,19 @@ class FlagTest extends TestCase
 
         $this->withToken($adminLogin->json('data.token'))
             ->getJson('/api/mensaje')
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Usa el token de un usuario almacenista para poder ver el mensaje.');
+
+        $staffLogin = $this->postJson('/api/login', [
+            'email' => 'almacenista@example.com',
+            'password' => 'password',
+        ])->assertOk();
+
+        $this->withToken($staffLogin->json('data.token'))
+            ->getJson('/api/mensaje')
             ->assertOk()
             ->assertJsonPath('message', 'El flag es data.respuesta.')
-            ->assertJsonPath('data.respuesta', 'FLAG{token-admin}');
+            ->assertJsonPath('data.respuesta', 'FLAG{token-almacenista}');
     }
 
     public function test_supervisor_flag_is_the_calculated_permission_diff(): void

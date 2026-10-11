@@ -326,8 +326,8 @@
                 "tags": [
                     "Mensaje"
                 ],
-                "summary": "Mensaje para el administrador",
-                "description": "GET en JSON. Sin token indica que uses el tuyo. Con el token de un usuario administrador, el flag está en data.respuesta.",
+                "summary": "Mensaje para el almacenista",
+                "description": "GET en JSON. Sin token indica que uses el tuyo. Con el token de un usuario almacenista, el flag está en data.respuesta.",
                 "operationId": "2a1901dcd97c0fb7cdc5f0516e730da1",
                 "responses": {
                     "200": {
@@ -351,7 +351,7 @@
                         }
                     },
                     "403": {
-                        "description": "El token no es de un administrador",
+                        "description": "El token no es de un almacenista",
                         "content": {
                             "application/json": {
                                 "schema": {

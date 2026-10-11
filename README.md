@@ -2,15 +2,15 @@
 
 Las respuestas se buscan en el código y probando la API. Cada respuesta es un solo flag: un dato, sin explicación.
 
-## 1
+## Pregunta 1
 
-`php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página. http://127.0.0.1:8000/api/documentation también debe abrir.
+`php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página.
 
 ```
 FLAG{...}
 ```
 
-## 2
+## Pregunta 2
 
 Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
 
@@ -18,9 +18,9 @@ Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el
 FLAG{cantidad}
 ```
 
-## 3
+## Pregunta 3
 
-Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token de un usuario administrador. El flag es `data.respuesta`.
+Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token de un usuario almacenista. El flag es `data.respuesta`.
 
 ```json
 {
@@ -33,7 +33,7 @@ Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token 
 }
 ```
 
-## 4
+## Pregunta 4
 
 En Swagger o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
 
@@ -57,6 +57,37 @@ La respuesta indica el archivo y qué corregir. Cuando funcione, el flag es `dat
   }
 }
 ```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
 # Requisitos mínimos para levantar
 
