@@ -53,9 +53,11 @@ class FlagController extends Controller
             return $this->sinDatos();
         }
 
+        $cantidad = $admin->permissions()->count();
+
         return view('flag', [
-            'mensaje' => 'Este flag se calcula: es la cantidad de permisos del rol admin. Copia el número.',
-            'flag' => $admin->permissions()->count(),
+            'mensaje' => 'Este flag se calcula: es la cantidad de permisos del rol admin. Copia el flag con su formato.',
+            'flag' => 'FLAG{'.$cantidad.'}',
         ]);
     }
 

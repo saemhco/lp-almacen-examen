@@ -82,7 +82,7 @@ class RegistroController extends Controller
         }
 
         return $this->successResponse([
-            'mensaje' => $codigo,
+            'mensaje' => 'FLAG{'.$codigo.'}',
         ], 'La respuesta está en data.mensaje.');
     }
 }

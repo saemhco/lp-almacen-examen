@@ -30,7 +30,7 @@ class FlagTest extends TestCase
         $this->get('/flags/admin')
             ->assertOk()
             ->assertSee('Este flag se calcula')
-            ->assertSee((string) $total, false);
+            ->assertSee('FLAG{'.$total.'}', false);
     }
 
     public function test_mensaje_requires_an_admin_token_and_returns_respuesta(): void

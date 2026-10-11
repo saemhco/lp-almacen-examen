@@ -1,39 +1,41 @@
-# Almacén
+# Examen
 
-Examen de la API de almacén. Las respuestas se buscan en el código y probando la API. La guía anterior quedó en `README.old`.
+Las respuestas se buscan en el código y probando la API. Cada respuesta es un solo flag: un dato, sin explicación.
 
-## Requisitos mínimos para levantar
+## 1
 
-Hace falta PHP 8.2 o superior, Composer y la extensión de SQLite. En la carpeta del proyecto:
+`php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página. http://127.0.0.1:8000/api/documentation también debe abrir.
 
-```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-touch database/database.sqlite
-php artisan migrate --seed
-php artisan serve
+```
+FLAG{...}
 ```
 
-- `composer install` instala Laravel y el resto de dependencias.
-- `.env` es la configuración local. `key:generate` crea `APP_KEY`.
-- `touch` crea la base SQLite. En `.env`, `DB_CONNECTION=sqlite`.
-- `migrate --seed` crea las tablas y carga los datos de prueba.
-- `serve` levanta el servidor en `http://127.0.0.1:8000`.
+## 2
 
-El proyecto está levantado cuando estas dos direcciones responden sin error:
+Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
 
-- http://127.0.0.1:8000/
-- http://127.0.0.1:8000/api/documentation
+```
+FLAG{cantidad}
+```
 
-## Preguntas
+## 3
 
-Cada respuesta es un solo flag: un dato, sin explicación.
+Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token de un usuario administrador. El flag es `data.respuesta`.
 
-1. `php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página. http://127.0.0.1:8000/api/documentation también debe abrir.
-2. Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
-3. Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token de un usuario administrador. El flag es el campo respuesta.
-4. En Swagger o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "El flag es data.respuesta.",
+  "data": {
+    "respuesta": "FLAG{...}"
+  }
+}
+```
+
+## 4
+
+En Swagger o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
 
 ```json
 {
@@ -43,9 +45,40 @@ Cada respuesta es un solo flag: un dato, sin explicación.
 }
 ```
 
-La respuesta indica el archivo y qué corregir. Cuando funcione, el flag es el código que devuelve.
+La respuesta indica el archivo y qué corregir. Cuando funcione, el flag es `data.mensaje`.
 
-## Comandos de Laravel
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "La respuesta está en data.mensaje.",
+  "data": {
+    "mensaje": "FLAG{...}"
+  }
+}
+```
+
+# Requisitos mínimos para levantar
+
+PHP 8.2 o superior y Composer.
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+Configura la base de datos en `.env`. Luego:
+
+```bash
+php artisan migrate --seed
+php artisan serve
+```
+
+- http://127.0.0.1:8000/
+- http://127.0.0.1:8000/api/documentation
+
+# Comandos de Laravel
 
 | Comando | Para qué sirve |
 | --- | --- |

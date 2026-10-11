@@ -54,7 +54,7 @@ class RegistroTest extends TestCase
         $this->actingAs($admin, 'sanctum')
             ->postJson('/api/registro', $this->payload())
             ->assertForbidden()
-            ->assertJsonPath('message', 'El nombre del rol tiene una letra de más. Abre config/udh.php y corrige el nombre del rol.');
+            ->assertJsonPath('message', 'El nombre del rol es incorrecto. Abre config/udh.php y corrige el nombre del rol.');
 
         Http::assertNothingSent();
     }
@@ -87,7 +87,7 @@ class RegistroTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('message', 'La respuesta está en data.mensaje.')
-            ->assertJsonPath('data.mensaje', 'UDH-LP1-042');
+            ->assertJsonPath('data.mensaje', 'FLAG{UDH-LP1-042}');
 
         Http::assertSent(function ($request) {
             return $request->url() === 'https://panki.quipu.club/api/v1/udh/lp1'
