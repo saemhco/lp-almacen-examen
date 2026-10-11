@@ -321,6 +321,48 @@
                 }
             }
         },
+        "/api/mensaje": {
+            "get": {
+                "tags": [
+                    "Mensaje"
+                ],
+                "summary": "Mensaje para el administrador",
+                "description": "GET en JSON. Sin token indica que uses el tuyo. Con el token de un usuario administrador, el flag está en data.respuesta.",
+                "operationId": "2a1901dcd97c0fb7cdc5f0516e730da1",
+                "responses": {
+                    "200": {
+                        "description": "El flag es data.respuesta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MensajeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Falta el token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "El token no es de un administrador",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/items": {
             "get": {
                 "tags": [
@@ -1316,6 +1358,83 @@
                 }
             }
         },
+        "/api/registro": {
+            "post": {
+                "tags": [
+                    "Registro"
+                ],
+                "summary": "Registrar al estudiante y obtener el flag",
+                "description": "POST. También se puede llamar desde Postman con el token de un administrador. Cuerpo: nombres, apellidos y codigo_universitario. El servidor agrega los metadatos del equipo y consulta el servicio externo, que no pide sesión. Si el rol no coincide, el mensaje indica el archivo y qué corregir. El flag es data.codigo.",
+                "operationId": "f75b3b3f9e1ae7a0707d0084626557f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombres",
+                                    "apellidos",
+                                    "codigo_universitario"
+                                ],
+                                "properties": {
+                                    "nombres": {
+                                        "type": "string",
+                                        "example": "Saúl"
+                                    },
+                                    "apellidos": {
+                                        "type": "string",
+                                        "example": "Escandón"
+                                    },
+                                    "codigo_universitario": {
+                                        "type": "string",
+                                        "example": "20201234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registro correcto. El flag es data.codigo.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RegistroResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthenticated"
+                    },
+                    "403": {
+                        "description": "El mensaje indica el archivo y qué corregir",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    },
+                    "502": {
+                        "description": "El servicio externo no devolvió el código",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/roles": {
             "get": {
                 "tags": [
@@ -2058,6 +2177,75 @@
     },
     "components": {
         "schemas": {
+            "Registro": {
+                "required": [
+                    "codigo"
+                ],
+                "properties": {
+                    "codigo": {
+                        "description": "Flag devuelto por el registro.",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "MensajeResponse": {
+                "required": [
+                    "success",
+                    "code",
+                    "message",
+                    "data"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "El flag es data.respuesta."
+                    },
+                    "data": {
+                        "properties": {
+                            "respuesta": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "RegistroResponse": {
+                "required": [
+                    "success",
+                    "code",
+                    "message",
+                    "data"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Registro correcto"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Registro"
+                    }
+                },
+                "type": "object"
+            },
             "ApiError": {
                 "required": [
                     "success",
@@ -3052,6 +3240,14 @@
         {
             "name": "Permissions",
             "description": "Permisos. Permisos: permissions.view, permissions.create, permissions.update, permissions.delete. Solo el admin los tiene."
+        },
+        {
+            "name": "Registro",
+            "description": "Registro del estudiante. POST /api/registro con el token de un administrador. El flag es data.codigo."
+        },
+        {
+            "name": "Mensaje",
+            "description": "Mensaje"
         }
     ]
 }

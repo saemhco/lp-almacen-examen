@@ -38,5 +38,10 @@ class PermissionSeeder extends Seeder
                 );
             }
         }
+
+        Permission::query()->firstOrCreate(
+            ['name' => 'registro.crate'],
+            ['description' => 'Crear registro'],
+        );
     }
 }

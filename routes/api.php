@@ -2,16 +2,20 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FlagController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/mensaje', [FlagController::class, 'mensaje']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -63,4 +67,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/permissions/{permission}', [PermissionController::class, 'show'])->middleware('permission:permissions.view');
     Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->middleware('permission:permissions.update');
     Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->middleware('permission:permissions.delete');
+
+    Route::post('/registro', [RegistroController::class, 'store']);
 });

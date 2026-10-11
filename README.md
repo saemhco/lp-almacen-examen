@@ -28,11 +28,22 @@ El proyecto está levantado cuando estas dos direcciones responden sin error:
 
 ## Preguntas
 
-1. Levanta el proyecto. Si `php artisan serve` muestra un error, léelo y corrígelo. Queda resuelto cuando abren la página de inicio y Swagger.
-2. En el modelo `User`, ¿qué método comprueba si esa persona tiene un permiso como `items.create`, y qué relación usa para llegar a su rol?
-3. Después de un login correcto, ¿en qué clave del JSON viene el token? Si luego se llama a `POST /api/logout` y se reutiliza ese mismo token, ¿qué código y qué mensaje devuelve la API?
-4. Un administrador intenta borrar un rol que todavía tiene usuarios. ¿Qué código HTTP y qué mensaje exacto devuelve la API?
-5. ¿Qué permisos tiene el rol `supervisor` que el rol `almacenista` no tiene?
+Cada respuesta es un solo flag: un dato, sin explicación.
+
+1. `php artisan serve` no deja el servidor en pie. Corrige la causa. Cuando http://127.0.0.1:8000/ responda, copia en la hoja el flag que muestra esa página. http://127.0.0.1:8000/api/documentation también debe abrir.
+2. Después de sembrar, abre http://127.0.0.1:8000/flags/admin. La vista calcula el flag y te indica cuál copiar.
+3. Abre http://127.0.0.1:8000/api/mensaje. Es un GET y responde JSON. Usa el token de un usuario administrador. El flag es el campo respuesta.
+4. En Swagger o en Postman, con el token de un administrador, envía `POST /api/registro` con este cuerpo:
+
+```json
+{
+  "nombres": "Tu nombre",
+  "apellidos": "Tus apellidos",
+  "codigo_universitario": "Tu código"
+}
+```
+
+La respuesta indica el archivo y qué corregir. Cuando funcione, el flag es el código que devuelve.
 
 ## Comandos de Laravel
 

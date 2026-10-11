@@ -13,6 +13,40 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Users', description: 'Usuarios. Permisos: users.view, users.create, users.update, users.delete. Solo el admin los tiene.')]
 #[OA\Tag(name: 'Roles', description: 'Roles. Permisos: roles.view, roles.create, roles.update, roles.delete. Solo el admin los tiene.')]
 #[OA\Tag(name: 'Permissions', description: 'Permisos. Permisos: permissions.view, permissions.create, permissions.update, permissions.delete. Solo el admin los tiene.')]
+#[OA\Tag(name: 'Registro', description: 'Registro del estudiante. POST /api/registro con el token de un administrador. El flag es data.codigo.')]
+#[OA\Schema(
+    schema: 'Registro',
+    required: ['codigo'],
+    properties: [
+        new OA\Property(property: 'codigo', type: 'string', description: 'Flag devuelto por el registro.'),
+    ]
+)]
+#[OA\Schema(
+    schema: 'MensajeResponse',
+    required: ['success', 'code', 'message', 'data'],
+    properties: [
+        new OA\Property(property: 'success', type: 'boolean', example: true),
+        new OA\Property(property: 'code', type: 'integer', example: 200),
+        new OA\Property(property: 'message', type: 'string', example: 'El flag es data.respuesta.'),
+        new OA\Property(
+            property: 'data',
+            properties: [
+                new OA\Property(property: 'respuesta', type: 'string'),
+            ],
+            type: 'object'
+        ),
+    ]
+)]
+#[OA\Schema(
+    schema: 'RegistroResponse',
+    required: ['success', 'code', 'message', 'data'],
+    properties: [
+        new OA\Property(property: 'success', type: 'boolean', example: true),
+        new OA\Property(property: 'code', type: 'integer', example: 200),
+        new OA\Property(property: 'message', type: 'string', example: 'Registro correcto'),
+        new OA\Property(property: 'data', ref: '#/components/schemas/Registro'),
+    ]
+)]
 #[OA\Schema(
     schema: 'ApiError',
     required: ['success', 'code', 'message', 'data'],
